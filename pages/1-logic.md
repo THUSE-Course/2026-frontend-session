@@ -1,212 +1,159 @@
 # TypeScript 语法
 
-<!-- Step 1 控制在 15 分钟左右解决 -->
+<!-- Step 1 控制在 10 分钟左右解决 -->
 
 ## 目标
 
-- 掌握基本的 TypeScript 语法
+- 快速了解 TypeScript 语法要点
+- 重点掌握**接口**与**函数/回调模式**（后续 React 核心前置知识）
 
 ---
 
-## 语法
+## 语法速览
 
-### 变量声明
-
-```ts twoslash
-// 声明一个字符串类型的常量
-const caption: string = "This is a string";
-// 声明一个数字类型的变量
-let val: number = 1;
-// 给变量 val 赋予新值
-val = 2;
-// 常量不能重新赋值
-caption = "This is another string";
-// 不能给变量赋予不符合其类型声明的值
-val = "A string"
-```
-
-<div v-click>
-
-当然，TypeScript 拥有强大的类型推断功能，可以省略部分类型标记：
+TypeScript 的基础语法（变量、运算、控制流）和 C++/Java 非常相似，不再逐一展开：
 
 ```ts twoslash
-let youKnowIt = true;
-youKnowIt = false;
-```
+// 变量声明：const 不可变，let 可变，类型可自动推断
+const name: string = "Alice";
+let count = 0;
 
-</div>
+// 运算符与 C++ 一致，但判等请用 === 和 !==（避免类型隐式转换）
+1 === 1;   // true
+1 === "1"; // false
 
----
-
-## 语法
-
-### 运算
-
-一般的运算符与 C++ 语法近似：
-
-```ts twoslash
-1 > 2; // false
-1 <= 4; // true
-1 + 3 > 2; // true
-```
-
-由于 JavaScript 的特性，请使用 `===` 与 `!==` 代替 `==` 与 `!=`，因为后者会进行类型转换：
-
-```ts 
-1 == true; // true
-1 === true; // false
-```
-
----
-
-## 语法
-
-### 控制流
-
-控制流的写法与 C++ 语法近似：
-
-```ts twoslash
-const foo: number = 3;
-if (foo !== 2) {
-    console.log("foo is not 2");
-}
-
+// 控制流写法与 C++ 一致
 for (let i = 0; i < 10; i++) {
-    console.log(`Now, i is ${i}`);
+    if (i % 2 === 0) console.log(i);
 }
+
+// 数组与对象
+const arr = [1, 2, 3];
+const obj = { foo: 1, bar: "hello" };
 ```
+<br />
+
+> 语法细节不必死记——写代码时随时让 AI 帮你查。
 
 ---
 
-## 语法
+## 接口（Interface）
 
-### 数组
-
-```ts twoslash
-// 在类型后面加上 [] 表示这个类型的值构成的数组
-const arr = [1, 2, 3, 4]; 
-// 二维数组
-const mat = [[1, 2], [3, 4]]; 
-// 元组：长度和每个元素的类型固定
-const tuple: [number, string] = [1, "TS"];
-```
-
-### 对象
-
-TypeScript 中，对象是键值对的集合，类似于 Python 中的字典:
+接口用于定义对象应具有的属性结构，是理解 React Props 的前置知识：
 
 ```ts twoslash
-const barfoo = {
-    foo: 1,
-    bar: "Test string",
-    foobar: [1, 2, 3],
+interface UserInfo {
+    name: string;
+    age: number;
+    hobbies: string[];
+}
+
+const alice: UserInfo = {
+    name: "Alice",
+    age: 20,
+    hobbies: ["coding", "gaming"],
 };
 ```
 
----
-
-## 语法
-
-### 接口
-
-接口是一种抽象结构，用于定义对象应具有的属性：
-
-```ts twoslash
-interface Bar {
-    foo: number;
-    bar: string;
-    foobar: number[];
-}
-
-const barfoo = {
-    foo: 1,
-    bar: "Test string",
-    foobar: [1, 2, 3],
-} as Bar;
-
-const bad = {
-    foo: "String",
-} as Bar;
-```
+访问不存在的属性会得到 `undefined`，对 `undefined` 调用方法会导致运行时报错——TypeScript 会帮你检测这类错误。
 
 ---
 
-## 语法
-
-### `undefined`
-
-在访问数组或对象的属性时，需要注意可能出现的 `undefined`：
+## 函数与箭头函数
 
 ```ts twoslash
-const arr: number[] = [1, 2, 3, 4];
-arr[0]; // 1
-arr[100]; // undefined
-
-const obj: any = {
-    foo: 1,
-    bar: "bar",
-};
-obj.foo // 1
-obj.barbar // undefined
-```
-
-尝试调用 `undefined` 或 `null` 的方法或属性会导致运行时错误，你可以在控制台看到报错。同时，TypeScript 会尝试检测这种错误。
-
-```ts twoslash
-const x = 1 > 2 ? 3 : undefined;
-x.toString();
-```
-
----
-
-## 语法
-
-### 函数声明
-
-```ts twoslash
-// 经典方法
+// 经典写法
 function sum(x: number, y: number): number {
     return x + y;
 }
 
-// 箭头函数，可作为 lambda 表达式使用
+// 箭头函数（lambda），React 中大量使用
 const sum2 = (x: number, y: number): number => x + y;
 
-// 调用
-sum(1, 2); // 3
+sum(1, 2);  // 3
 sum2(2, 3); // 5
 ```
 
 ---
 
-## 语法
+## 回调模式
 
-### 数组的常用方法
+### 为什么需要回调？
 
-由于 TypeScript 的动态特性，回调模式被广泛地使用，指将函数作为参数传递给另一个函数：
+考虑一个场景：你希望在用户点击按钮时执行某段逻辑。但**你写代码的时候并不知道用户什么时候会点击**。
+
+你不能写 `while (没点击) { 等着 }`，因为这会卡死整个页面。
+
+解决方案：**把"要做的事"写成一个函数，交给浏览器，让它在事件发生时替你调用。**
+
+```ts
+// 你不是在"调用"这个函数，而是把它"交出去"
+button.addEventListener("click", () => {
+    console.log("用户点击了！");
+});
+// 代码执行到这里时，上面的函数还没有被调用
+// 只有用户真的点击了按钮，浏览器才会"回头调用"它
+```
+
+这就是**回调（Callback）**——"我先描述好要做什么，你在合适的时候帮我执行"。
+
+> 该页面由 AI 生成。
+
+---
+
+### 更多的例子
+
+回调不仅仅用于事件处理，它是 JS/TS/React 中最核心的模式：
+
+| 场景 | 回调的内容 | 调用者 | 调用时机 |
+|------|--------------|---------|------------|
+| `Array.map(fn)` | 对每个元素做什么 | 数组方法 | 遍历时立即调用 |
+| `onClick={fn}` | 点击时做什么 | React/浏览器 | 用户点击时 |
+| `useEffect(fn)` | 副作用逻辑 | React | 渲染完成后 |
+| `Promise.then(fn)` | 拿到结果后做什么 | Promise | 异步完成时 |
+| `setTimeout(fn, 1000)` | 延迟执行什么 | 浏览器 | 1 秒后 |
+
+<br />
+
+> 该页面由 AI 生成。
+
+---
+
+### 数组的回调方法
 
 ```ts twoslash
 const arr = [1, 2, 3, 4, 5];
 
-// 遍历数组，第一个参数是数组元素的值，第二个参数是数组下标
+// forEach: 遍历
 arr.forEach((val, ind) => {
-    console.log(`The value at index ${ind} is ${val}.`);
+    console.log(`Index ${ind}: ${val}`);
 });
-// 映射数组，返回一个新数组
-arr.map(val => val * val); // [1, 4, 9, 16, 25]
-// 筛选数组，返回一个新数组
-arr.filter(val => val % 2 === 0); // [2, 4]
 
-// 在尾部添加元素
-arr.push(6);
-arr; // [1, 2, 3, 4, 5, 6]
+// map: 映射为新数组（React 渲染列表的核心方法）
+arr.map(val => val * val); // [1, 4, 9, 16, 25]
+
+// filter: 筛选为新数组
+arr.filter(val => val % 2 === 0); // [2, 4]
 ```
+
+<!--
+这一页的数组方法大家不需要死记，用的时候查就行。
+重点是理解它们的共同模式：你传一个函数进去，告诉它"对每个元素做什么"。
+
+后面讲 React 的时候你会看到，渲染一个列表就是：
+data.map(item => <Component key={item.id} data={item} />)
+本质上就是"对每条数据，返回一个组件"——这就是回调。
+
+再往后讲 useEffect 和异步的时候，你传给 useEffect 的函数、
+传给 .then() 的函数，都是回调——只不过调用时机不同。
+所以今天把这个模式理解透了，后面的内容会顺畅很多。
+-->
 
 ---
 
 ## 学习资源
 
-以上仅仅是对 TypeScript 语法最基本的介绍，如果你希望更加深入地学习 TypeScript 语言：
+语法细节请按需查阅，或直接让 AI 解释：
 
 - [TypeScript 官方文档](https://www.typescriptlang.org/docs/)
 - [TypeScript 语言基础 - 计算机系科协技能引导文档](https://docs.net9.org/languages/typescript/)
